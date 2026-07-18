@@ -1,6 +1,6 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-import { describe, expect, it, beforeAll, afterAll } from 'vitest';
+import { describe, expect, it, beforeAll } from 'vitest';
 import * as schema from '../schema';
 
 describe('Database schema', () => {
