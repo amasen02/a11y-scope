@@ -5,8 +5,7 @@
  */
 
 import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import { createHash, randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

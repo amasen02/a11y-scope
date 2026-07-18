@@ -29,6 +29,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NEXTAUTH_SECRET: ci-placeholder-not-for-production
 
   security-scan:
     runs-on: ubuntu-latest
