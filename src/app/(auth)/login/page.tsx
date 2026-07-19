@@ -8,11 +8,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/sites';
+  const showSetup = searchParams.get('setup') === '1';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [setupDismissed, setSetupDismissed] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,6 +48,35 @@ function LoginForm() {
           <h1 className="text-3xl font-bold text-gray-900">a11y-scope</h1>
           <p className="mt-2 text-gray-600">WCAG 2.2 Accessibility Monitor</p>
         </div>
+
+        {showSetup && !setupDismissed && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-semibold mb-1">First-time setup</p>
+                <p>
+                  Run this command to create your admin account, then sign in below:
+                </p>
+                <pre className="mt-2 bg-blue-100 rounded px-2 py-1 text-xs overflow-x-auto">
+                  docker compose exec app node scripts/seed-user.mjs
+                </pre>
+                <p className="mt-2">
+                  Default credentials:{' '}
+                  <strong>admin@example.com</strong> /{' '}
+                  <strong>admin123</strong>
+                  {' — '}change the password after first login.
+                </p>
+              </div>
+              <button
+                onClick={() => setSetupDismissed(true)}
+                aria-label="Dismiss setup notice"
+                className="shrink-0 text-blue-500 hover:text-blue-700 text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -99,6 +130,18 @@ function LoginForm() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+
+        {!showSetup && (
+          <p className="mt-4 text-center text-xs text-gray-400">
+            First time here?{' '}
+            <a
+              href="/login?setup=1"
+              className="text-blue-500 hover:underline"
+            >
+              View setup instructions
+            </a>
+          </p>
+        )}
       </div>
     </div>
   );

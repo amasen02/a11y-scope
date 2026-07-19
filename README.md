@@ -46,6 +46,18 @@ docker-compose exec app node scripts/seed-user.mjs
 # Change the password after first login
 ```
 
+> **⚠️ Security — replace `NEXTAUTH_SECRET` before any networked deployment.**
+> The `.env.example` placeholder (`change-me-strong-random-string`) is intentionally
+> weak. Generate a strong secret before exposing a11y-scope on any network beyond
+> your own machine:
+>
+> ```bash
+> node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+> ```
+>
+> Copy the output into your `.env.local` as `NEXTAUTH_SECRET=<output>`.
+> A weak or default secret allows session tokens to be forged.
+
 ### Local development
 
 Requirements: Node.js 20+, npm
@@ -74,7 +86,7 @@ npm run dev
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `NEXTAUTH_SECRET` | **Yes** | — | Random string for session encryption |
+| `NEXTAUTH_SECRET` | **Yes** | — | Random string for session encryption — **must be changed from the example value before any networked deployment** |
 | `NEXTAUTH_URL` | Yes | `http://localhost:3000` | Full public URL of your deployment |
 | `DATABASE_URL` | No | `./data/a11yscope.db` | Path to the SQLite database file |
 | `SMTP_HOST` | No | — | SMTP server hostname (email alerts disabled if absent) |
