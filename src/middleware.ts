@@ -2,22 +2,22 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 
-export async function proxy(request: NextRequest) {
+const PUBLIC_PATHS = ['/login', '/api/auth', '/api/webhook'];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
+export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
 
-  const isPublicPath =
-    nextUrl.pathname === '/login' ||
-    nextUrl.pathname.startsWith('/api/auth') ||
-    nextUrl.pathname.startsWith('/api/webhook');
-
-  if (isPublicPath) {
+  if (isPublicPath(nextUrl.pathname)) {
     return NextResponse.next();
   }
 
   const session = await auth();
-  const isLoggedIn = !!session;
 
-  if (!isLoggedIn) {
+  if (!session) {
     const loginUrl = new URL('/login', nextUrl.origin);
     loginUrl.searchParams.set('callbackUrl', nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
