@@ -8,6 +8,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Build-time placeholders — real values are injected at runtime via docker-compose env
+ENV NEXTAUTH_SECRET=build-placeholder
+ENV DATABASE_URL=file:/tmp/build-placeholder.db
 RUN npm run build
 
 FROM mcr.microsoft.com/playwright:v1.50.0-noble AS runner
@@ -18,7 +21,14 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Copy seed script and its runtime dependencies (not included in Next.js standalone build)
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder /app/node_modules/@libsql ./node_modules/@libsql
+COPY --from=builder /app/node_modules/libsql ./node_modules/libsql
+COPY --from=builder /app/node_modules/js-base64 ./node_modules/js-base64
+COPY --from=builder /app/node_modules/promise-limit ./node_modules/promise-limit
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data /app/scripts
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
