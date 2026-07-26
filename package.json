@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@axe-core/playwright": "^4.10.2",
-    "@libsql/client": "^0.14.0",
+    "@libsql/client": "^0.17.4",
     "axe-core": "^4.10.2",
     "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.44.3",
