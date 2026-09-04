@@ -1,5 +1,10 @@
 # a11y-scope
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/amasen02/a11y-scope/badge)](https://securityscorecards.dev/viewer/?uri=github.com/amasen02/a11y-scope)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10332/badge)](https://www.bestpractices.dev/en)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](.github/SECURITY.md)
+
+
 [![CI](https://github.com/amasen02/a11y-scope/actions/workflows/ci.yml/badge.svg)](https://github.com/amasen02/a11y-scope/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
@@ -178,3 +183,33 @@ npm run build     # full TypeScript + Next.js build check
 ## License & Author
 
 MIT © 2024 [Ama Senevirathne](https://github.com/amasen02)
+
+---
+
+## 🌟 Fork, Build Upon & Extend This Project
+
+We deliberately built this repository to be **100% open, modular, and easy to fork and extend**:
+
+- 🔓 **Permissive MIT License**: Zero CLA, commercial use permitted, you keep full ownership of your contributions.
+- 🛡️ **Hardened Supply Chain**: Built with automated CI testing, OpenSSF Scorecard supply-chain security, and strict quality checks.
+- ⚡ **High-Performance Foundation**: Zero unnecessary bloat &mdash; clean architectural boundaries that make hacking on this code a joy.
+
+### 💡 High-Impact Ideas Ready for You to Build:
+- **Add automated WCAG 2.2 AAA color contrast matrix analyzer**
+- **Implement multi-page sitemap crawler with automated Playwright headless runner**
+- **Build instant PR comment bot reporting accessibility regressions in GitHub Actions**
+- **Add export to PDF / HTML executive audit reports for compliance teams**
+
+### 🚀 60-Second Quickstart
+```bash
+git clone https://github.com/amasen02/a11y-scope.git
+cd a11y-scope
+npm install
+npm test
+```
+
+### 🤝 Frictionless Contributions
+1. **Fork** the repo & clone it locally.
+2. Create your feature branch (`git checkout -b feat/my-awesome-idea`).
+3. Verify tests pass cleanly.
+4. Open a PR &mdash; we review and merge PRs within 24–48 hours!
