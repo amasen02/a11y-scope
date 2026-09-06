@@ -47,7 +47,7 @@ Open http://localhost:3000. Create your admin account by running:
 
 ```bash
 docker-compose exec app node scripts/seed-user.mjs
-# Default: admin@example.com / admin123
+# Credentials are required; there are no defaults.
 # Change the password after first login
 ```
 
@@ -105,6 +105,11 @@ npm run dev
 
 Trigger a scan from your GitHub Actions pipeline and surface accessibility regressions as PR checks:
 
+The endpoint requires a shared secret and only re-scans a site that is **already
+registered** from the dashboard. It never creates sites, so a caller cannot point the
+scanner at an arbitrary address. If `WEBHOOK_SECRET` is unset the endpoint refuses every
+request rather than accepting them.
+
 ```yaml
 - name: Check accessibility
   run: |
@@ -113,6 +118,14 @@ Trigger a scan from your GitHub Actions pipeline and surface accessibility regre
       -d '{"url":"${{ env.PREVIEW_URL }}"}')
     echo "Scan ID: $(echo $SCAN | jq -r .scanId)"
 ```
+
+| Response | Meaning |
+|---|---|
+| `202` | Scan queued |
+| `401` | Missing or wrong `X-Webhook-Secret` |
+| `404` | That URL is not a registered site; add it from the dashboard first |
+| `400` | URL is malformed, non-http, carries credentials, or resolves to a private address |
+| `503` | `WEBHOOK_SECRET` is not configured on the server |
 
 ---
 

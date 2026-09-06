@@ -18,7 +18,7 @@ npx playwright install chromium
 # Create the DB schema
 npm run db:push
 
-# Seed admin user (admin@example.com / admin123)
+# Seed an admin user (credentials required, no defaults)
 npm run seed
 
 npm run dev

@@ -7,7 +7,11 @@ services:
     environment:
       - DATABASE_URL=/app/data/a11yscope.db
       - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=change-me-in-production
+      # Required. Generate with: openssl rand -base64 32
+      # Supplied from the environment or a .env file; never committed with a value.
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET before starting}
+      # Required to enable POST /api/webhook. Unset means the endpoint refuses every request.
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
       - SMTP_HOST=
       - SMTP_PORT=587
       - SMTP_USER=

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { scans, sites } from '@/lib/schema';
 import { desc, eq, sql } from 'drizzle-orm';
+import { assertPublicUrl } from '@/lib/url-safety';
 
 export async function GET() {
   const session = await auth();
@@ -55,10 +56,11 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Site URL is required' }, { status: 400 });
   }
 
-  try {
-    new URL(url);
-  } catch {
-    return Response.json({ error: 'Invalid URL format' }, { status: 400 });
+  // Registering a site schedules a recurring headless-browser fetch, so the same
+  // private-range guard the webhook uses applies here even for a signed-in user.
+  const check = await assertPublicUrl(url.trim());
+  if (!check.ok) {
+    return Response.json({ error: check.reason }, { status: 400 });
   }
 
   const id = crypto.randomUUID();
