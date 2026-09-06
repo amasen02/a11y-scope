@@ -1,8 +1,7 @@
 # a11y-scope
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/amasen02/a11y-scope/badge)](https://securityscorecards.dev/viewer/?uri=github.com/amasen02/a11y-scope)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10332/badge)](https://www.bestpractices.dev/en)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](.github/SECURITY.md)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
 
 
 [![CI](https://github.com/amasen02/a11y-scope/actions/workflows/ci.yml/badge.svg)](https://github.com/amasen02/a11y-scope/actions/workflows/ci.yml)
@@ -46,9 +45,8 @@ docker-compose up --build
 Open http://localhost:3000. Create your admin account by running:
 
 ```bash
-docker-compose exec app node scripts/seed-user.mjs
-# Credentials are required; there are no defaults.
-# Change the password after first login
+docker-compose exec app node scripts/seed-user.mjs <your-email> '<password>'
+# Credentials are required; there are no defaults, and the password must be 12+ characters.
 ```
 
 > **⚠️ Security — replace `NEXTAUTH_SECRET` before any networked deployment.**

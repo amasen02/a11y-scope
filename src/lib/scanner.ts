@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 import { db } from './db';
 import { sendAlertEmail } from './email';
 import { scans, sites, violations } from './schema';
+import { assertPublicUrl, hostResolverRules } from './url-safety';
 
 export async function scanSite(siteId: string, url: string, scanId: string): Promise<void> {
   // Mark scan as running
@@ -15,7 +16,22 @@ export async function scanSite(siteId: string, url: string, scanId: string): Pro
   let browser = null;
 
   try {
-    browser = await chromium.launch({ headless: true });
+    // Re-check at connection time. The site row was validated when it was written, but a
+    // hostname can be repointed at an internal address afterwards, and cron re-scans reach
+    // this function without passing through any route handler.
+    const check = await assertPublicUrl(url);
+    if (!check.ok) {
+      throw new Error(`Refusing to scan ${url}: ${check.reason}`);
+    }
+
+    // Pin Chromium to the address that was just validated. Checking DNS here and letting
+    // the browser resolve the same name again would leave a rebinding window between the
+    // two lookups, which is the whole point of the check.
+    const pin = hostResolverRules(check.url, check.addresses);
+    browser = await chromium.launch({
+      headless: true,
+      args: pin ? [`--host-resolver-rules=${pin}`] : [],
+    });
     const context = await browser.newContext();
     const page = await context.newPage();
 

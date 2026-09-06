@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertPublicUrl } from '../url-safety';
+import { assertPublicUrl, hostResolverRules } from '../url-safety';
 
 // A resolver stub keeps these tests offline and deterministic. The production path uses
 // dns.lookup; the logic under test is what we do with the answers.
@@ -84,5 +84,39 @@ describe('assertPublicUrl', () => {
   it('rejects a malformed URL', async () => {
     const result = await assertPublicUrl('not a url', resolvesTo('93.184.216.34'));
     expect(result.ok).toBe(false);
+  });
+});
+
+describe('hostResolverRules', () => {
+  it('pins the hostname to the address assertPublicUrl validated', async () => {
+    const result = await assertPublicUrl('https://example.com/page', resolvesTo('93.184.216.34'));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.addresses).toEqual(['93.184.216.34']);
+    expect(hostResolverRules(result.url, result.addresses))
+      .toBe('MAP example.com 93.184.216.34');
+  });
+
+  it('brackets an IPv6 answer so Chromium parses the mapping', async () => {
+    const result = await assertPublicUrl('https://v6.example/', resolvesTo('2606:4700::1111'));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(hostResolverRules(result.url, result.addresses))
+      .toBe('MAP v6.example [2606:4700::1111]');
+  });
+
+  it('has nothing to pin for a literal address, which was itself the thing checked', async () => {
+    const result = await assertPublicUrl('https://93.184.216.34/', resolvesTo());
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.addresses).toEqual(['93.184.216.34']);
+    expect(hostResolverRules(result.url, result.addresses)).toBeNull();
+  });
+
+  it('refuses to pin to a private address even if one is handed to it', () => {
+    const url = new URL('https://rebind.example/');
+    expect(hostResolverRules(url, ['169.254.169.254'])).toBeNull();
+    expect(hostResolverRules(url, ['127.0.0.1'])).toBeNull();
+    expect(hostResolverRules(url, ['not-an-address'])).toBeNull();
   });
 });

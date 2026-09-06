@@ -58,13 +58,11 @@ function LoginForm() {
                   Run this command to create your admin account, then sign in below:
                 </p>
                 <pre className="mt-2 bg-blue-100 rounded px-2 py-1 text-xs overflow-x-auto">
-                  docker compose exec app node scripts/seed-user.mjs
+                  {"docker compose exec app node scripts/seed-user.mjs <your-email> '<password>'"}
                 </pre>
                 <p className="mt-2">
-                  Default credentials:{' '}
-                  <strong>admin@example.com</strong> /{' '}
-                  <strong>admin123</strong>
-                  {' — '}change the password after first login.
+                  There are no default credentials. Choose your own email and a password of
+                  at least 12 characters; the seeder refuses anything shorter.
                 </p>
               </div>
               <button

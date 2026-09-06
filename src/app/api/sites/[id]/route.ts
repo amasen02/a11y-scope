@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { scans, sites, violations } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { assertPublicUrl } from '@/lib/url-safety';
 
 export async function GET(
   _req: Request,
@@ -47,12 +48,17 @@ export async function PATCH(
 
   if (name !== undefined) updates.name = String(name).trim();
   if (url !== undefined) {
-    try {
-      new URL(url);
-      updates.url = String(url).trim();
-    } catch {
-      return Response.json({ error: 'Invalid URL format' }, { status: 400 });
+    if (typeof url !== 'string') {
+      return Response.json({ error: 'Site URL must be a string' }, { status: 400 });
     }
+    // Editing the URL is another way to aim the scanner's headless browser, so it runs the
+    // same private-range guard as POST /api/sites. `new URL()` alone accepts
+    // http://169.254.169.254/ and http://127.0.0.1:6379/.
+    const check = await assertPublicUrl(url.trim());
+    if (!check.ok) {
+      return Response.json({ error: check.reason }, { status: 400 });
+    }
+    updates.url = url.trim();
   }
   if (cronSchedule !== undefined) updates.cronSchedule = String(cronSchedule);
   if (alertThreshold !== undefined) updates.alertThreshold = Number(alertThreshold);

@@ -9,10 +9,15 @@ import { isIP } from 'node:net';
  * is not enough: it happily accepts `http://169.254.169.254/`, `http://localhost:6379/`
  * and `file:///etc/passwd`.
  *
- * This module rejects a URL unless every address its hostname resolves to is public.
+ * This module rejects a URL unless every address its hostname resolves to is public, and
+ * reports the addresses it validated. Validating a name and then letting the client resolve
+ * it again leaves a DNS-rebinding window, so a caller that opens the connection must pin it
+ * to those addresses — see `hostResolverRules`.
  */
 
-export type UrlCheck = { ok: true; url: URL } | { ok: false; reason: string };
+export type UrlCheck =
+  | { ok: true; url: URL; addresses: string[] }
+  | { ok: false; reason: string };
 
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 
@@ -102,7 +107,7 @@ export async function assertPublicUrl(
   if (isIP(hostname)) {
     return isPrivateAddress(hostname)
       ? { ok: false, reason: 'URL resolves to a non-public address' }
-      : { ok: true, url };
+      : { ok: true, url, addresses: [hostname] };
   }
 
   let records: Array<{ address: string }>;
@@ -115,5 +120,26 @@ export async function assertPublicUrl(
   if (records.some(record => isPrivateAddress(record.address))) {
     return { ok: false, reason: 'URL resolves to a non-public address' };
   }
-  return { ok: true, url };
+  return { ok: true, url, addresses: records.map(record => record.address) };
+}
+
+/**
+ * Chromium `--host-resolver-rules` value pinning a hostname to an address `assertPublicUrl`
+ * already accepted.
+ *
+ * Without it the guard and the connection resolve the name independently: a short-TTL zone
+ * under the caller's control can answer with a public address for the check and with
+ * 169.254.169.254 for the browser moments later. Mapping the name means the browser never
+ * makes that second lookup.
+ *
+ * Returns null when there is nothing to pin — a literal address is already the thing that
+ * was checked.
+ */
+export function hostResolverRules(url: URL, addresses: string[]): string | null {
+  const hostname = url.hostname.replace(/^\[|\]$/g, '');
+  if (!hostname || isIP(hostname)) return null;
+  // Every entry was checked above; re-check so a caller cannot pin to something private.
+  const target = addresses.find(address => isIP(address) !== 0 && !isPrivateAddress(address));
+  if (!target) return null;
+  return `MAP ${hostname} ${isIP(target) === 6 ? `[${target}]` : target}`;
 }
