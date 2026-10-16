@@ -22,7 +22,7 @@
     "next-auth": "^5.0.0-beta.29",
     "node-cron": "^3.0.3",
     "nodemailer": "^7.0.0",
-    "playwright": "^1.50.1",
+    "playwright": "^1.62.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.8",
     "recharts": "^3.10.1",
